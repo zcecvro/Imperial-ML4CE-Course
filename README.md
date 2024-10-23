@@ -16,10 +16,5 @@ This repository contains the material for the coursework coding projects.
 
     pip:
     ```bash
-        pip install -r setup/requirements.txt
-    ```
-    conda:
-    ```bash
-    conda env create -f setup/environment.yml
-    conda activate ml4ce
+    pip install -r requirements.txt
     ```

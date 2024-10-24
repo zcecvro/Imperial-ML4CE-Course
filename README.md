@@ -7,8 +7,21 @@ Welcome to the Machine Learning for Chemical Engineering (ML4CE) course reposito
 This repository contains the material for the coursework coding projects.
 
 ## Getting Started
+1. **Clone the repo:**
    ```bash
    git clone https://github.com/EmPajak21/Imperial-ML4CE-Course.git 
    cd Imperial-ML4CE-Course
-   pip install -r requirements.txt
    ```
+2. **Install Dependencies**
+    
+    conda (recommended):
+    ```bash
+    conda create --name myenv python=3.10 
+    conda activate myenv
+    pip install -r requirements.txt
+    ```
+
+    pip:
+    ```bash
+    pip install -r requirements.txt
+    ```

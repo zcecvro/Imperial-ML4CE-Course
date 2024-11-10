@@ -1,5 +1,8 @@
 from scipy.optimize import minimize
 import numpy as np
+import GPyOpt
+from GPyOpt.methods import BayesianOptimization
+from scipy.optimize import minimize
 
 #########################
 # --- Random search --- #
@@ -33,25 +36,39 @@ def Random_search(f, n_p, bounds_rs, iter_rs):
     return f_b, x_b
 
 
-####################
-# Powell algorithm #
-####################
-
-def your_alg(f, x_dim, bounds, iter_tot):
+def your_alg(f, x_dim, bounds, f_eval_, has_x0=False):
     '''
     params: parameters that define the rbf model
     X:      matrix of previous datapoints
+    bounds: should be a list of tuples, where each tuple contains the lower and upper bounds for each dimension
     '''
+    if has_x0:
+        iter_ = f_eval_ - 1
+        x_best = f.x0[0].flatten()
+    else:
+        n_rs = int(max(x_dim + 1, f_eval_ * 0.05))
+        iter_ = f_eval_ - n_rs
+        f_best, x_best = Random_search(f, x_dim, bounds, n_rs)
 
-    n_rs = int(min(100,max(iter_tot*.05,5)))       # iterations to find good starting point
+    # Now, bounds are passed as a list of tuples
+    # Bounds are now compatible with minimize (in COBYQA style)
+    
+    # Create and run the Bayesian Optimization
+    myBopt = GPyOpt.methods.BayesianOptimization(
+        f=f.fun_test,
+        domain=[{'name': 'var_' + str(i + 1), 'type': 'continuous', 'domain': bounds[i]} for i in range(len(bounds))],
+        X=x_best.reshape(1, -1) if has_x0 else None,
+        initial_design_numdata=n_rs if not has_x0 else 0,
+        exact_feval=True
+    )
+    myBopt.run_optimization(max_iter=iter_)
 
-    # evaluate first point
-    f_best, x_best = Random_search(f, x_dim, bounds, n_rs)
-    iter_          = iter_tot - n_rs
+    # Extract the optimal solution and its corresponding function value
+    x_opt = myBopt.x_opt
+    f_opt = myBopt.fx_opt
 
-    opt = minimize(f.fun_test, x_best, bounds=bounds, method='Powell', 
-                    options={'maxfev': iter_}) 
-
-    team_names = ['7','8']
+    # Add the required team_names and cids
+    team_names = ['7', '8']
     cids = ['01234567']
-    return opt.x, opt.fun, team_names, cids
+
+    return x_opt, f_opt, team_names, cids
